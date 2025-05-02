@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace 'com.healthx'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.healthx"
@@ -29,11 +29,20 @@ android {
 }
 
 dependencies {
-
+    // Android UI 组件
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
     implementation libs.constraintlayout
+    
+    // Retrofit 网络请求相关 - 直接引用
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    
+    // 测试相关
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
