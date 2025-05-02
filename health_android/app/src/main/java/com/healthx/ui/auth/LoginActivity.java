@@ -2,6 +2,7 @@ package com.healthx.ui.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -22,6 +23,7 @@ import com.healthx.viewmodel.AuthViewModel;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private static final String TAG = "LoginActivity";
     private AuthViewModel authViewModel;
     private TextInputLayout tilUsername, tilPassword;
     private TextInputEditText etUsername, etPassword;
@@ -34,13 +36,14 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // 初始化TokenManager
-        TokenManager.getInstance().init(this);
+        // 初始化TokenManager - 现在在Application中已经初始化，这里只是安全检查
+        if (TokenManager.getInstance().getSharedPreferences() == null) {
+            TokenManager.getInstance().init(this);
+        }
         
         // 检查用户是否已登录，如果已登录，直接进入主页
         if (TokenManager.getInstance().isLoggedIn()) {
-            startActivity(new Intent(this, MainActivity.class));
-            finish();
+            navigateToMainActivity();
             return;
         }
 
@@ -58,13 +61,17 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        tilUsername = findViewById(R.id.tilUsername);
-        tilPassword = findViewById(R.id.tilPassword);
-        etUsername = findViewById(R.id.etUsername);
-        etPassword = findViewById(R.id.etPassword);
-        btnLogin = findViewById(R.id.btnLogin);
-        tvRegister = findViewById(R.id.tvRegister);
-        progressBar = findViewById(R.id.progressBar);
+        try {
+            tilUsername = findViewById(R.id.tilUsername);
+            tilPassword = findViewById(R.id.tilPassword);
+            etUsername = findViewById(R.id.etUsername);
+            etPassword = findViewById(R.id.etPassword);
+            btnLogin = findViewById(R.id.btnLogin);
+            tvRegister = findViewById(R.id.tvRegister);
+            progressBar = findViewById(R.id.progressBar);
+        } catch (Exception e) {
+            Log.e(TAG, "Error initializing views: " + e.getMessage());
+        }
     }
 
     private void setupListeners() {
@@ -96,25 +103,43 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void login() {
-        String username = etUsername.getText().toString().trim();
-        String password = etPassword.getText().toString().trim();
-        
-        // 显示进度条
-        progressBar.setVisibility(View.VISIBLE);
-        
-        // 调用ViewModel的登录方法
-        authViewModel.login(username, password).observe(this, result -> {
-            // 隐藏进度条
-            progressBar.setVisibility(View.GONE);
+        try {
+            String username = etUsername.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
             
-            if (result.getStatus() == Resource.Status.SUCCESS) {
-                User user = result.getData();
-                Toast.makeText(this, R.string.login_success, Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                finish();
-            } else if (result.getStatus() == Resource.Status.ERROR) {
-                Toast.makeText(this, result.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+            // 显示进度条
+            progressBar.setVisibility(View.VISIBLE);
+            
+            // 调用ViewModel的登录方法
+            authViewModel.login(username, password).observe(this, result -> {
+                // 隐藏进度条
+                progressBar.setVisibility(View.GONE);
+                
+                if (result.getStatus() == Resource.Status.SUCCESS) {
+                    User user = result.getData();
+                    Toast.makeText(this, R.string.login_success, Toast.LENGTH_SHORT).show();
+                    // 延迟200毫秒再跳转，确保Toast显示
+                    progressBar.postDelayed(this::navigateToMainActivity, 200);
+                } else if (result.getStatus() == Resource.Status.ERROR) {
+                    Toast.makeText(this, result.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        } catch (Exception e) {
+            progressBar.setVisibility(View.GONE);
+            Log.e(TAG, "Error during login: " + e.getMessage());
+            Toast.makeText(this, "登录过程中发生错误: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void navigateToMainActivity() {
+        try {
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+        } catch (Exception e) {
+            Log.e(TAG, "Error navigating to MainActivity: " + e.getMessage());
+            Toast.makeText(this, "无法进入主页: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 } 

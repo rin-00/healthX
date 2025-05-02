@@ -1,7 +1,5 @@
 package com.healthx.network.model;
 
-import java.util.Date;
-
 /**
  * API通用响应模型
  */
@@ -10,7 +8,7 @@ public class ApiResponse<T> {
     private boolean success;
     private String message;
     private T data;
-    private Date timestamp;
+    private String timestamp;
     
     public ApiResponse() {
     }
@@ -39,11 +37,11 @@ public class ApiResponse<T> {
         this.data = data;
     }
     
-    public Date getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
     
-    public void setTimestamp(Date timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
 } 

@@ -33,4 +33,29 @@
     <string name="username_invalid">用户名格式不正确</string>
     <string name="password_invalid">密码格式不正确</string>
     <string name="email_invalid">邮箱格式不正确</string>
+    
+    <!-- 底部导航栏 -->
+    <string name="tab_record">记录</string>
+    <string name="tab_analysis">分析</string>
+    <string name="tab_profile">我的</string>
+    
+    <!-- 记录页面 -->
+    <string name="diet_record">饮食记录</string>
+    <string name="exercise_record">运动记录</string>
+    <string name="water_record">喝水记录</string>
+    <string name="sleep_record">睡眠记录</string>
+    <string name="weight_record">体重记录</string>
+    <string name="step_record">步数统计</string>
+    <string name="add_record">添加记录</string>
+    
+    <!-- 分析页面 -->
+    <string name="health_analysis">健康分析</string>
+    <string name="data_visualization">数据可视化</string>
+    <string name="health_plan">健康计划</string>
+    
+    <!-- 我的页面 -->
+    <string name="user_info">个人信息</string>
+    <string name="settings">设置</string>
+    <string name="about">关于我们</string>
+    <string name="logout">退出登录</string>
 </resources>

@@ -15,6 +15,11 @@ import com.healthx.network.model.LoginRequest;
 import com.healthx.network.model.RegisterRequest;
 import com.healthx.network.model.UserResponse;
 
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -40,6 +45,8 @@ public class UserRepository {
         MutableLiveData<Resource<User>> result = new MutableLiveData<>();
         result.setValue(Resource.loading(null));
         
+        Log.d(TAG, "注册请求: " + username + ", " + email + ", " + nickname);
+        
         RegisterRequest request = new RegisterRequest(username, password, email, nickname);
         
         apiService.register(request).enqueue(new Callback<ApiResponse<UserResponse>>() {
@@ -54,20 +61,49 @@ public class UserRepository {
                             userResponse.getNickname(),
                             null
                     );
+                    Log.d(TAG, "注册成功: " + username);
                     result.setValue(Resource.success(user));
                 } else {
                     String errorMsg = "注册失败";
+                    
                     if (response.body() != null) {
                         errorMsg = response.body().getMessage();
+                        Log.e(TAG, "服务器返回错误: " + errorMsg);
+                    } else {
+                        try {
+                            errorMsg = "服务器错误: " + response.code() + " " + response.message();
+                            if (response.errorBody() != null) {
+                                errorMsg += " - " + response.errorBody().string();
+                            }
+                        } catch (IOException e) {
+                            Log.e(TAG, "解析错误响应失败", e);
+                        }
+                        Log.e(TAG, "HTTP错误: " + errorMsg);
                     }
+                    
                     result.setValue(Resource.error(errorMsg, null));
                 }
             }
             
             @Override
             public void onFailure(Call<ApiResponse<UserResponse>> call, Throwable t) {
-                Log.e(TAG, "注册失败: " + t.getMessage());
-                result.setValue(Resource.error("网络错误: " + t.getMessage(), null));
+                String errorMsg;
+                
+                if (t instanceof ConnectException) {
+                    errorMsg = "无法连接到服务器，请检查网络连接";
+                    Log.e(TAG, "连接错误", t);
+                } else if (t instanceof SocketTimeoutException) {
+                    errorMsg = "连接服务器超时，请稍后重试";
+                    Log.e(TAG, "连接超时", t);
+                } else if (t instanceof UnknownHostException) {
+                    errorMsg = "找不到服务器，请检查API地址配置";
+                    Log.e(TAG, "未知主机", t);
+                } else {
+                    errorMsg = "网络错误: " + t.getMessage();
+                    Log.e(TAG, "注册失败", t);
+                }
+                
+                result.setValue(Resource.error(errorMsg, null));
             }
         });
         
