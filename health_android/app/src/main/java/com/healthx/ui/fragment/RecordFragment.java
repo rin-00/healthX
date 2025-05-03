@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,7 +21,7 @@ import com.healthx.ui.adapter.HealthCardAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecordFragment extends Fragment {
+public class RecordFragment extends Fragment implements HealthCardAdapter.OnItemClickListener {
 
     private RecyclerView recyclerView;
     private HealthCardAdapter adapter;
@@ -38,6 +39,7 @@ public class RecordFragment extends Fragment {
         initViews(view);
         setupRecyclerView();
         setupListeners();
+        setupBackStackListener();
     }
 
     private void initViews(View view) {
@@ -47,6 +49,7 @@ public class RecordFragment extends Fragment {
 
     private void setupRecyclerView() {
         adapter = new HealthCardAdapter(getHealthCards());
+        adapter.setOnItemClickListener(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(adapter);
     }
@@ -55,6 +58,26 @@ public class RecordFragment extends Fragment {
         fabAddRecord.setOnClickListener(v -> 
             Toast.makeText(requireContext(), "添加记录", Toast.LENGTH_SHORT).show()
         );
+    }
+
+    private void setupBackStackListener() {
+        getChildFragmentManager().addOnBackStackChangedListener(() -> {
+            // 当返回栈变化时，检查是否需要恢复视图
+            if (getChildFragmentManager().getBackStackEntryCount() == 0) {
+                // 返回栈为空，恢复RecordFragment视图
+                if (recyclerView != null) {
+                    recyclerView.setVisibility(View.VISIBLE);
+                }
+                if (fabAddRecord != null) {
+                    fabAddRecord.setVisibility(View.VISIBLE);
+                }
+                
+                View fragmentContainer = requireView().findViewById(R.id.fragment_container);
+                if (fragmentContainer != null) {
+                    fragmentContainer.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 
     private List<HealthCard> getHealthCards() {
@@ -67,5 +90,93 @@ public class RecordFragment extends Fragment {
         cards.add(new HealthCard(R.string.weight_record, "体重：65kg", android.R.drawable.ic_menu_report_image));
         cards.add(new HealthCard(R.string.step_record, "今日步数：8500步", android.R.drawable.ic_menu_directions));
         return cards;
+    }
+    
+    @Override
+    public void onItemClick(HealthCard healthCard) {
+        int titleResId = healthCard.getTitleResId();
+        if (titleResId == R.string.diet_record) {
+            // 跳转到饮食记录页面
+            navigateToDietFragment();
+        } else if (titleResId == R.string.exercise_record) {
+            // 跳转到运动记录页面
+            navigateToExerciseFragment();
+        } else {
+            // 处理其他类型的记录
+            Toast.makeText(requireContext(), "点击了：" + getString(titleResId), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void navigateToDietFragment() {
+        // 隐藏RecyclerView和FAB
+        recyclerView.setVisibility(View.GONE);
+        fabAddRecord.setVisibility(View.GONE);
+        
+        // 显示Fragment容器
+        View fragmentContainer = requireView().findViewById(R.id.fragment_container);
+        fragmentContainer.setVisibility(View.VISIBLE);
+        
+        // 添加DietFragment
+        DietFragment dietFragment = new DietFragment();
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, dietFragment);
+        transaction.addToBackStack("diet_fragment");
+        transaction.commitAllowingStateLoss();
+        
+        // 确保事务完成后，视图可见性正确设置
+        getChildFragmentManager().executePendingTransactions();
+    }
+    
+    private void navigateToExerciseFragment() {
+        // 隐藏RecyclerView和FAB
+        recyclerView.setVisibility(View.GONE);
+        fabAddRecord.setVisibility(View.GONE);
+        
+        // 显示Fragment容器
+        View fragmentContainer = requireView().findViewById(R.id.fragment_container);
+        fragmentContainer.setVisibility(View.VISIBLE);
+        
+        // 添加ExerciseFragment
+        ExerciseFragment exerciseFragment = new ExerciseFragment();
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, exerciseFragment);
+        transaction.addToBackStack("exercise_fragment");
+        transaction.commitAllowingStateLoss();
+        
+        // 确保事务完成后，视图可见性正确设置
+        getChildFragmentManager().executePendingTransactions();
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        // 如果返回到此Fragment，确保RecyclerView可见
+        if (recyclerView != null) {
+            recyclerView.setVisibility(View.VISIBLE);
+        }
+        if (fabAddRecord != null) {
+            fabAddRecord.setVisibility(View.VISIBLE);
+        }
+    }
+    
+    // 处理返回键，供MainActivity调用
+    public boolean handleBackPress() {
+        // 处理返回键
+        if (getChildFragmentManager().getBackStackEntryCount() > 0) {
+            // 如果有子Fragment，处理返回栈
+            getChildFragmentManager().popBackStackImmediate();
+            
+            // 确保视图可见性正确设置
+            recyclerView.setVisibility(View.VISIBLE);
+            fabAddRecord.setVisibility(View.VISIBLE);
+            
+            View fragmentContainer = requireView().findViewById(R.id.fragment_container);
+            if (fragmentContainer != null) {
+                fragmentContainer.setVisibility(View.GONE);
+            }
+            
+            return true;
+        }
+        return false;
     }
 } 

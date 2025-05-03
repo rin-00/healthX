@@ -19,9 +19,14 @@ import java.util.List;
 public class HealthCardAdapter extends RecyclerView.Adapter<HealthCardAdapter.HealthCardViewHolder> {
 
     private final List<HealthCard> healthCards;
+    private OnItemClickListener listener;
 
     public HealthCardAdapter(List<HealthCard> healthCards) {
         this.healthCards = healthCards;
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
     }
 
     @NonNull
@@ -34,7 +39,7 @@ public class HealthCardAdapter extends RecyclerView.Adapter<HealthCardAdapter.He
     @Override
     public void onBindViewHolder(@NonNull HealthCardViewHolder holder, int position) {
         HealthCard card = healthCards.get(position);
-        holder.bind(card);
+        holder.bind(card, listener);
     }
 
     @Override
@@ -56,7 +61,7 @@ public class HealthCardAdapter extends RecyclerView.Adapter<HealthCardAdapter.He
             actionButton = itemView.findViewById(R.id.button_card_action);
         }
 
-        public void bind(HealthCard card) {
+        public void bind(HealthCard card, final OnItemClickListener listener) {
             iconView.setImageResource(card.getIconResId());
             titleView.setText(card.getTitleResId());
             summaryView.setText(card.getSummary());
@@ -68,10 +73,14 @@ public class HealthCardAdapter extends RecyclerView.Adapter<HealthCardAdapter.He
             });
             
             itemView.setOnClickListener(v -> {
-                Toast.makeText(itemView.getContext(), 
-                    itemView.getContext().getString(card.getTitleResId()) + " 详情", 
-                    Toast.LENGTH_SHORT).show();
+                if (listener != null) {
+                    listener.onItemClick(card);
+                }
             });
         }
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(HealthCard healthCard);
     }
 } 

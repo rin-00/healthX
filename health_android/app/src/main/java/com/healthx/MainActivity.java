@@ -126,4 +126,19 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "无需切换Fragment或Fragment为null");
         }
     }
+
+    @Override
+    public void onBackPressed() {
+        // 如果当前Fragment是RecordFragment，尝试处理子Fragment的返回
+        if (activeFragment instanceof RecordFragment) {
+            RecordFragment recordFrag = (RecordFragment) activeFragment;
+            if (recordFrag.handleBackPress()) {
+                // 已由RecordFragment处理
+                return;
+            }
+        }
+        
+        // 默认处理
+        super.onBackPressed();
+    }
 }

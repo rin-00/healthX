@@ -2,8 +2,20 @@ package com.healthx.network;
 
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import com.healthx.util.Constants;
 
+import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.format.DateTimeFormatter;
+
+import java.lang.reflect.Type;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -53,15 +65,55 @@ public class ApiClient {
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         httpClientBuilder.addInterceptor(loggingInterceptor);
         
+        // 创建自定义的Gson实例以处理LocalDateTime
+        Gson gson = createGson();
+        
         // 创建Retrofit实例
         retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .client(httpClientBuilder.build())
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
         
         isInitialized = true;
         Log.d(TAG, "ApiClient初始化完成，使用服务器地址: " + BASE_URL);
+    }
+    
+    /**
+     * 创建自定义的Gson实例，处理LocalDateTime的序列化和反序列化
+     */
+    private Gson createGson() {
+        return new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new JsonSerializer<LocalDateTime>() {
+                    private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+                    
+                    @Override
+                    public JsonElement serialize(LocalDateTime src, Type typeOfSrc, JsonSerializationContext context) {
+                        return new JsonPrimitive(formatter.format(src));
+                    }
+                })
+                .registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
+                    private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+                    
+                    @Override
+                    public LocalDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
+                        String dateString = json.getAsString();
+                        return LocalDateTime.parse(dateString, formatter);
+                    }
+                })
+                .create();
+    }
+    
+    /**
+     * 获取Retrofit实例
+     *
+     * @return Retrofit实例
+     */
+    public static synchronized Retrofit getClient() {
+        if (instance == null) {
+            getInstance();
+        }
+        return instance.retrofit;
     }
     
     /**
@@ -98,12 +150,33 @@ public class ApiClient {
                 ).setLevel(HttpLoggingInterceptor.Level.BODY))
                 .build();
         
+        // 创建自定义的Gson实例
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new JsonSerializer<LocalDateTime>() {
+                    private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+                    
+                    @Override
+                    public JsonElement serialize(LocalDateTime src, Type typeOfSrc, JsonSerializationContext context) {
+                        return new JsonPrimitive(formatter.format(src));
+                    }
+                })
+                .registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
+                    private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+                    
+                    @Override
+                    public LocalDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
+                        String dateString = json.getAsString();
+                        return LocalDateTime.parse(dateString, formatter);
+                    }
+                })
+                .create();
+        
         instance = new ApiClient() {
             {
                 this.retrofit = new Retrofit.Builder()
                         .baseUrl(newBaseUrl)
                         .client(httpClient)
-                        .addConverterFactory(GsonConverterFactory.create())
+                        .addConverterFactory(GsonConverterFactory.create(gson))
                         .build();
             }
         };

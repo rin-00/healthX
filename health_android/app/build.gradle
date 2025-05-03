@@ -39,6 +39,17 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment:2.7.7'
     implementation 'androidx.navigation:navigation-ui:2.7.7'
     
+    // Java 8日期时间API向后兼容支持
+    implementation 'com.jakewharton.threetenabp:threetenabp:1.4.0'
+    
+    // Room 数据库相关依赖
+    implementation 'androidx.room:room-runtime:2.6.1'
+    annotationProcessor 'androidx.room:room-compiler:2.6.1'
+    implementation 'androidx.room:room-ktx:2.6.1'
+    
+    // SwipeRefreshLayout 下拉刷新布局
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    
     // Retrofit 网络请求相关 - 直接引用
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'

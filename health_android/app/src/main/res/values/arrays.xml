@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 饮食模块的餐食类型 -->
+    <string-array name="meal_types">
+        <item>早餐</item>
+        <item>午餐</item>
+        <item>晚餐</item>
+        <item>零食</item>
+    </string-array>
+    
+    <!-- 运动模块的运动类型 -->
+    <string-array name="exercise_types">
+        <item>有氧运动</item>
+        <item>力量训练</item>
+        <item>柔韧性训练</item>
+        <item>平衡训练</item>
+        <item>功能性训练</item>
+        <item>其他</item>
+    </string-array>
+    
+    <!-- 运动模块的强度级别 -->
+    <string-array name="exercise_intensities">
+        <item>低强度</item>
+        <item>中等强度</item>
+        <item>高强度</item>
+    </string-array>
+</resources> 

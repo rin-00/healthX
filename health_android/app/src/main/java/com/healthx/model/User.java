@@ -1,26 +1,49 @@
 package com.healthx.model;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+import androidx.room.Ignore;
+import androidx.room.ColumnInfo;
 import java.io.Serializable;
 
 /**
  * 用户实体类
  */
+@Entity(tableName = "users")
 public class User implements Serializable {
 
+    @PrimaryKey(autoGenerate = true)
     private Long id;
+    
+    @ColumnInfo(name = "username")
     private String username;
+    
+    @ColumnInfo(name = "email")
     private String email;
+    
+    @ColumnInfo(name = "nickname")
     private String nickname;
+    
+    @Ignore // token不需要持久化到数据库
     private String token;
+    
+    @ColumnInfo(name = "gender")
     private String gender;
+    
+    @ColumnInfo(name = "age")
     private Integer age;
+    
+    @ColumnInfo(name = "height")
     private Double height;
+    
+    @ColumnInfo(name = "weight")
     private Double weight;
 
     // 构造函数
     public User() {
     }
 
+    @Ignore // 包含token的构造函数不应被Room使用
     public User(Long id, String username, String email, String nickname, String token) {
         this.id = id;
         this.username = username;

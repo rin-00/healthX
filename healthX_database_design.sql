@@ -129,6 +129,22 @@ CREATE TABLE health_metrics (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+
+-- 食物表
+CREATE TABLE food_items (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    calories INT NOT NULL,
+    protein DOUBLE,
+    fat DOUBLE,
+    carbohydrate DOUBLE,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL
+);
+
+-- 添加食物表索引
+CREATE INDEX idx_food_items_name ON food_items(name);
+
 -- 添加索引以提高查询性能
 CREATE INDEX idx_weight_records_user_id ON weight_records(user_id);
 CREATE INDEX idx_diet_records_user_id ON diet_records(user_id);

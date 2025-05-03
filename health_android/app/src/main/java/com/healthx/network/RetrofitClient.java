@@ -1,8 +1,20 @@
 package com.healthx.network;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import com.healthx.util.Constants;
 
+import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.format.DateTimeFormatter;
+
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.security.cert.CertificateException;
 import java.util.concurrent.TimeUnit;
 
@@ -105,10 +117,31 @@ public class RetrofitClient {
             }
         });
         
+        // 创建自定义的Gson实例以处理LocalDateTime
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new JsonSerializer<LocalDateTime>() {
+                    private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+                    
+                    @Override
+                    public JsonElement serialize(LocalDateTime src, Type typeOfSrc, JsonSerializationContext context) {
+                        return new JsonPrimitive(formatter.format(src));
+                    }
+                })
+                .registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
+                    private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+                    
+                    @Override
+                    public LocalDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
+                        String dateString = json.getAsString();
+                        return LocalDateTime.parse(dateString, formatter);
+                    }
+                })
+                .create();
+        
         // 创建Retrofit实例
         retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .client(httpClient.build())
                 .build();
         
