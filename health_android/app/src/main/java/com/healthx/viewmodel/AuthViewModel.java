@@ -1,5 +1,6 @@
 package com.healthx.viewmodel;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Patterns;
 
@@ -26,8 +27,8 @@ public class AuthViewModel extends ViewModel {
     private final MutableLiveData<String> emailError = new MutableLiveData<>();
     private final MutableLiveData<String> nicknameError = new MutableLiveData<>();
     
-    public AuthViewModel() {
-        userRepository = new UserRepository();
+    public AuthViewModel(Context context) {
+        userRepository = new UserRepository(context);
     }
     
     /**

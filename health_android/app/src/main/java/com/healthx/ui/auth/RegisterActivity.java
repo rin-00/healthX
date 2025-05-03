@@ -17,6 +17,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.healthx.R;
 import com.healthx.repository.Resource;
 import com.healthx.viewmodel.AuthViewModel;
+import com.healthx.viewmodel.ViewModelFactory;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -37,7 +38,7 @@ public class RegisterActivity extends AppCompatActivity {
         initViews();
         
         // 初始化ViewModel
-        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+        authViewModel = new ViewModelProvider(this, new ViewModelFactory(this)).get(AuthViewModel.class);
         
         // 设置监听器
         setupListeners();

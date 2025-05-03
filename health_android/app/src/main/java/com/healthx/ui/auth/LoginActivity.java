@@ -20,6 +20,7 @@ import com.healthx.model.User;
 import com.healthx.network.TokenManager;
 import com.healthx.repository.Resource;
 import com.healthx.viewmodel.AuthViewModel;
+import com.healthx.viewmodel.ViewModelFactory;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -51,7 +52,7 @@ public class LoginActivity extends AppCompatActivity {
         initViews();
         
         // 初始化ViewModel
-        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+        authViewModel = new ViewModelProvider(this, new ViewModelFactory(this)).get(AuthViewModel.class);
         
         // 设置监听器
         setupListeners();

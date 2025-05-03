@@ -1,10 +1,15 @@
 package com.healthx.repository;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.healthx.model.User;
 import com.healthx.network.ApiService;
 import com.healthx.network.RetrofitClient;
@@ -16,9 +21,12 @@ import com.healthx.network.model.RegisterRequest;
 import com.healthx.network.model.UserResponse;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,10 +40,54 @@ public class UserRepository {
     private static final String TAG = "UserRepository";
     private final ApiService apiService;
     private final TokenManager tokenManager;
+    private final SharedPreferences sharedPreferences;
+    private final Gson gson;
     
-    public UserRepository() {
+    // 本地缓存的用户数据
+    private final Map<Long, User> userCache = new HashMap<>();
+    private static final String PREF_USER_CACHE = "user_cache";
+    
+    public UserRepository(Context context) {
         apiService = RetrofitClient.getInstance().getApiService();
         tokenManager = TokenManager.getInstance();
+        sharedPreferences = context.getSharedPreferences("health_prefs", Context.MODE_PRIVATE);
+        gson = new Gson();
+        
+        // 从SharedPreferences加载缓存
+        loadCache();
+    }
+    
+    private void loadCache() {
+        String userCacheJson = sharedPreferences.getString(PREF_USER_CACHE, null);
+        if (userCacheJson != null) {
+            Type type = new TypeToken<Map<Long, User>>(){}.getType();
+            Map<Long, User> loadedCache = gson.fromJson(userCacheJson, type);
+            if (loadedCache != null) {
+                userCache.putAll(loadedCache);
+            }
+        }
+    }
+    
+    private void saveCache() {
+        String userCacheJson = gson.toJson(userCache);
+        sharedPreferences.edit().putString(PREF_USER_CACHE, userCacheJson).apply();
+    }
+    
+    /**
+     * 从本地缓存获取用户
+     */
+    public User getUserById(long userId) {
+        return userCache.get(userId);
+    }
+    
+    /**
+     * 保存用户到本地缓存
+     */
+    public void saveUser(User user) {
+        if (user != null && user.getId() != null) {
+            userCache.put(user.getId(), user);
+            saveCache();
+        }
     }
     
     /**
@@ -51,7 +103,7 @@ public class UserRepository {
         
         apiService.register(request).enqueue(new Callback<ApiResponse<UserResponse>>() {
             @Override
-            public void onResponse(Call<ApiResponse<UserResponse>> call, Response<ApiResponse<UserResponse>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<UserResponse>> call, @NonNull Response<ApiResponse<UserResponse>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     UserResponse userResponse = response.body().getData();
                     User user = new User(
@@ -61,6 +113,15 @@ public class UserRepository {
                             userResponse.getNickname(),
                             null
                     );
+                    // 设置健康数据
+                    user.setGender(userResponse.getGender());
+                    user.setAge(userResponse.getAge());
+                    user.setHeight(userResponse.getHeight());
+                    user.setWeight(userResponse.getWeight());
+                    
+                    // 保存到缓存
+                    saveUser(user);
+                    
                     Log.d(TAG, "注册成功: " + username);
                     result.setValue(Resource.success(user));
                 } else {
@@ -86,7 +147,7 @@ public class UserRepository {
             }
             
             @Override
-            public void onFailure(Call<ApiResponse<UserResponse>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<UserResponse>> call, @NonNull Throwable t) {
                 String errorMsg;
                 
                 if (t instanceof ConnectException) {
@@ -121,7 +182,7 @@ public class UserRepository {
         
         apiService.login(request).enqueue(new Callback<ApiResponse<JwtResponse>>() {
             @Override
-            public void onResponse(Call<ApiResponse<JwtResponse>> call, Response<ApiResponse<JwtResponse>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<JwtResponse>> call, @NonNull Response<ApiResponse<JwtResponse>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     JwtResponse jwtResponse = response.body().getData();
                     
@@ -133,13 +194,33 @@ public class UserRepository {
                             jwtResponse.getEmail()
                     );
                     
+                    // 保存用户ID到SharedPreferences
+                    sharedPreferences.edit().putLong("user_id", jwtResponse.getId()).apply();
+                    
                     User user = new User(
                             jwtResponse.getId(),
                             jwtResponse.getUsername(),
                             jwtResponse.getEmail(),
-                            null,
+                            jwtResponse.getNickname() != null ? jwtResponse.getNickname() : "",
                             jwtResponse.getToken()
                     );
+                    
+                    // 设置健康数据
+                    if (jwtResponse.getGender() != null) {
+                        user.setGender(jwtResponse.getGender());
+                    }
+                    if (jwtResponse.getAge() != null) {
+                        user.setAge(jwtResponse.getAge());
+                    }
+                    if (jwtResponse.getHeight() != null) {
+                        user.setHeight(jwtResponse.getHeight());
+                    }
+                    if (jwtResponse.getWeight() != null) {
+                        user.setWeight(jwtResponse.getWeight());
+                    }
+                    
+                    // 保存到缓存
+                    saveUser(user);
                     
                     result.setValue(Resource.success(user));
                 } else {
@@ -152,7 +233,7 @@ public class UserRepository {
             }
             
             @Override
-            public void onFailure(Call<ApiResponse<JwtResponse>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<JwtResponse>> call, @NonNull Throwable t) {
                 Log.e(TAG, "登录失败: " + t.getMessage());
                 result.setValue(Resource.error("网络错误: " + t.getMessage(), null));
             }
@@ -170,7 +251,7 @@ public class UserRepository {
         
         apiService.checkUsername(username).enqueue(new Callback<ApiResponse<Boolean>>() {
             @Override
-            public void onResponse(Call<ApiResponse<Boolean>> call, Response<ApiResponse<Boolean>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<Boolean>> call, @NonNull Response<ApiResponse<Boolean>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     Boolean exists = response.body().getData();
                     result.setValue(Resource.success(exists));
@@ -180,7 +261,7 @@ public class UserRepository {
             }
             
             @Override
-            public void onFailure(Call<ApiResponse<Boolean>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<Boolean>> call, @NonNull Throwable t) {
                 Log.e(TAG, "检查用户名失败: " + t.getMessage());
                 result.setValue(Resource.error("网络错误: " + t.getMessage(), null));
             }
@@ -198,7 +279,7 @@ public class UserRepository {
         
         apiService.checkEmail(email).enqueue(new Callback<ApiResponse<Boolean>>() {
             @Override
-            public void onResponse(Call<ApiResponse<Boolean>> call, Response<ApiResponse<Boolean>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<Boolean>> call, @NonNull Response<ApiResponse<Boolean>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     Boolean exists = response.body().getData();
                     result.setValue(Resource.success(exists));
@@ -208,7 +289,7 @@ public class UserRepository {
             }
             
             @Override
-            public void onFailure(Call<ApiResponse<Boolean>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<Boolean>> call, @NonNull Throwable t) {
                 Log.e(TAG, "检查邮箱失败: " + t.getMessage());
                 result.setValue(Resource.error("网络错误: " + t.getMessage(), null));
             }
@@ -218,22 +299,28 @@ public class UserRepository {
     }
     
     /**
-     * 获取当前登录用户信息
+     * 获取当前登录的用户信息
      */
     public LiveData<Resource<User>> getCurrentUser() {
         MutableLiveData<Resource<User>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading(null));
         
-        if (!tokenManager.isLoggedIn()) {
-            result.setValue(Resource.error("用户未登录", null));
+        long userId = sharedPreferences.getLong("user_id", -1);
+        if (userId == -1) {
+            result.setValue(Resource.error("未登录", null));
             return result;
         }
         
-        result.setValue(Resource.loading(null));
+        // 先尝试从缓存获取
+        User cachedUser = getUserById(userId);
+        if (cachedUser != null) {
+            result.setValue(Resource.success(cachedUser));
+        }
         
-        Long userId = tokenManager.getUserId();
+        // 再从网络获取最新数据
         apiService.getUserById(userId).enqueue(new Callback<ApiResponse<UserResponse>>() {
             @Override
-            public void onResponse(Call<ApiResponse<UserResponse>> call, Response<ApiResponse<UserResponse>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<UserResponse>> call, @NonNull Response<ApiResponse<UserResponse>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     UserResponse userResponse = response.body().getData();
                     User user = new User(
@@ -243,19 +330,28 @@ public class UserRepository {
                             userResponse.getNickname(),
                             tokenManager.getToken()
                     );
+                    
+                    // 设置健康数据
                     user.setGender(userResponse.getGender());
                     user.setAge(userResponse.getAge());
                     user.setHeight(userResponse.getHeight());
                     user.setWeight(userResponse.getWeight());
                     
+                    // 保存到缓存
+                    saveUser(user);
+                    
                     result.setValue(Resource.success(user));
                 } else {
-                    result.setValue(Resource.error("获取用户信息失败", null));
+                    String errorMsg = "获取用户信息失败";
+                    if (response.body() != null) {
+                        errorMsg = response.body().getMessage();
+                    }
+                    result.setValue(Resource.error(errorMsg, null));
                 }
             }
             
             @Override
-            public void onFailure(Call<ApiResponse<UserResponse>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<UserResponse>> call, @NonNull Throwable t) {
                 Log.e(TAG, "获取用户信息失败: " + t.getMessage());
                 result.setValue(Resource.error("网络错误: " + t.getMessage(), null));
             }
@@ -268,6 +364,14 @@ public class UserRepository {
      * 退出登录
      */
     public void logout() {
+        // 清除Token
         tokenManager.clearUserInfo();
+        
+        // 清除SharedPreferences中的用户ID
+        sharedPreferences.edit().remove("user_id").apply();
+        
+        // 清除缓存
+        userCache.clear();
+        saveCache();
     }
 } 

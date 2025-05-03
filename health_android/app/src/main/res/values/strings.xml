@@ -58,4 +58,16 @@
     <string name="settings">设置</string>
     <string name="about">关于我们</string>
     <string name="logout">退出登录</string>
+    <string name="edit_profile">编辑资料</string>
+    <string name="edit_basic_info">编辑基本信息</string>
+    <string name="basic_info">基本信息</string>
+    <string name="profile_updated">个人资料已更新</string>
+    <string name="basic_info_updated">基本信息已更新</string>
+    <string name="save">保存</string>
+    <string name="cancel">取消</string>
+    <string name="gender">性别</string>
+    <string name="age">年龄</string>
+    <string name="height">身高</string>
+    <string name="weight">体重</string>
+    <string name="bmi">BMI指数</string>
 </resources>
