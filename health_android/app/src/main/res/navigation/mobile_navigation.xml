@@ -22,4 +22,30 @@
         android:name="com.healthx.ui.fragment.ProfileFragment"
         android:label="@string/tab_profile"
         tools:layout="@layout/fragment_profile" />
+        
+    <fragment
+        android:id="@+id/sleepFragment"
+        android:name="com.healthx.ui.fragment.SleepFragment"
+        android:label="睡眠记录"
+        tools:layout="@layout/fragment_sleep">
+        <action
+            android:id="@+id/action_sleepFragment_to_sleepDetailFragment"
+            app:destination="@id/sleepDetailFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+    
+    <fragment
+        android:id="@+id/sleepDetailFragment"
+        android:name="com.healthx.ui.fragment.SleepDetailFragment"
+        android:label="睡眠详情"
+        tools:layout="@layout/fragment_sleep_detail" />
+
+    <fragment
+        android:id="@+id/navigation_weight"
+        android:name="com.healthx.ui.weight.WeightFragment"
+        android:label="@string/weight_management"
+        tools:layout="@layout/fragment_weight" />
 </navigation> 

@@ -12,6 +12,7 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.healthx.util.Constants;
 
+import org.threeten.bp.LocalDate;
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
 
@@ -84,6 +85,7 @@ public class ApiClient {
      */
     private Gson createGson() {
         return new GsonBuilder()
+                // LocalDateTime处理
                 .registerTypeAdapter(LocalDateTime.class, new JsonSerializer<LocalDateTime>() {
                     private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
                     
@@ -98,7 +100,36 @@ public class ApiClient {
                     @Override
                     public LocalDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
                         String dateString = json.getAsString();
-                        return LocalDateTime.parse(dateString, formatter);
+                        LocalDateTime result = com.healthx.util.DateTimeUtils.parseFlexibleDateTime(dateString);
+                        if (result != null) {
+                            return result;
+                        } else {
+                            // 如果灵活解析失败，回退到简单格式
+                            try {
+                                return LocalDateTime.parse(dateString, formatter);
+                            } catch (Exception e) {
+                                Log.e("ApiClient", "无法解析日期时间: " + dateString, e);
+                                throw new RuntimeException("无法解析日期时间: " + dateString, e);
+                            }
+                        }
+                    }
+                })
+                // LocalDate处理
+                .registerTypeAdapter(LocalDate.class, new JsonSerializer<LocalDate>() {
+                    private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+                    
+                    @Override
+                    public JsonElement serialize(LocalDate src, Type typeOfSrc, JsonSerializationContext context) {
+                        return new JsonPrimitive(formatter.format(src));
+                    }
+                })
+                .registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
+                    private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+                    
+                    @Override
+                    public LocalDate deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
+                        String dateString = json.getAsString();
+                        return LocalDate.parse(dateString, formatter);
                     }
                 })
                 .create();
@@ -152,6 +183,7 @@ public class ApiClient {
         
         // 创建自定义的Gson实例
         Gson gson = new GsonBuilder()
+                // LocalDateTime处理
                 .registerTypeAdapter(LocalDateTime.class, new JsonSerializer<LocalDateTime>() {
                     private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
                     
@@ -166,27 +198,58 @@ public class ApiClient {
                     @Override
                     public LocalDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
                         String dateString = json.getAsString();
-                        return LocalDateTime.parse(dateString, formatter);
+                        LocalDateTime result = com.healthx.util.DateTimeUtils.parseFlexibleDateTime(dateString);
+                        if (result != null) {
+                            return result;
+                        } else {
+                            // 如果灵活解析失败，回退到简单格式
+                            try {
+                                return LocalDateTime.parse(dateString, formatter);
+                            } catch (Exception e) {
+                                Log.e("ApiClient", "无法解析日期时间: " + dateString, e);
+                                throw new RuntimeException("无法解析日期时间: " + dateString, e);
+                            }
+                        }
+                    }
+                })
+                // LocalDate处理
+                .registerTypeAdapter(LocalDate.class, new JsonSerializer<LocalDate>() {
+                    private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+                    
+                    @Override
+                    public JsonElement serialize(LocalDate src, Type typeOfSrc, JsonSerializationContext context) {
+                        return new JsonPrimitive(formatter.format(src));
+                    }
+                })
+                .registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
+                    private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+                    
+                    @Override
+                    public LocalDate deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
+                        String dateString = json.getAsString();
+                        return LocalDate.parse(dateString, formatter);
                     }
                 })
                 .create();
         
-        instance = new ApiClient() {
-            {
-                this.retrofit = new Retrofit.Builder()
-                        .baseUrl(newBaseUrl)
-                        .client(httpClient)
-                        .addConverterFactory(GsonConverterFactory.create(gson))
-                        .build();
-            }
-        };
+        // 创建新实例
+        instance = new ApiClient();
         
-        Log.d(TAG, "ApiClient重置完成，使用新服务器地址: " + newBaseUrl);
+        // 覆盖retrofit实例
+        instance.retrofit = new Retrofit.Builder()
+                .baseUrl(newBaseUrl)
+                .client(httpClient)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+        
+        Log.d(TAG, "ApiClient重置完成，新地址: " + newBaseUrl);
         return instance;
     }
     
     /**
-     * 检查ApiClient是否已初始化
+     * 判断ApiClient是否已初始化
+     * 
+     * @return 是否已初始化
      */
     public static boolean isInitialized() {
         return isInitialized;

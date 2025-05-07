@@ -20,4 +20,10 @@
     <color name="color_warning">#FFC107</color>
     <color name="color_error">#F44336</color>
     <color name="color_info">#2196F3</color>
+    
+    <!-- BMI状态颜色 -->
+    <color name="bmi_underweight">#FF9800</color> <!-- 橙色 - 偏瘦 -->
+    <color name="bmi_normal">#4CAF50</color> <!-- 绿色 - 正常 -->
+    <color name="bmi_overweight">#FF5722</color> <!-- 橙红色 - 超重 -->
+    <color name="bmi_obese">#F44336</color> <!-- 红色 - 肥胖 -->
 </resources>

@@ -14,6 +14,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.healthx.ui.fragment.AnalysisFragment;
 import com.healthx.ui.fragment.ProfileFragment;
 import com.healthx.ui.fragment.RecordFragment;
+import com.healthx.ui.fragment.SleepFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -136,6 +137,14 @@ public class MainActivity extends AppCompatActivity {
                 // 已由RecordFragment处理
                 return;
             }
+        }
+        
+        // 检查是否是SleepDetailFragment
+        Fragment sleepDetailFragment = fragmentManager.findFragmentByTag("sleep_detail_fragment");
+        if (sleepDetailFragment != null && sleepDetailFragment.isVisible()) {
+            // 如果是SleepDetailFragment，让其父级FragmentManager处理返回
+            sleepDetailFragment.getParentFragmentManager().popBackStack();
+            return;
         }
         
         // 默认处理

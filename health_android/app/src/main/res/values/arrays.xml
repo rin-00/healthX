@@ -10,11 +10,43 @@
     
     <!-- 运动模块的运动类型 -->
     <string-array name="exercise_types">
-        <item>有氧运动</item>
-        <item>力量训练</item>
-        <item>柔韧性训练</item>
-        <item>平衡训练</item>
-        <item>功能性训练</item>
+        <item>步行</item>
+        <item>跑步</item>
+        <item>骑自行车</item>
+        <item>游泳</item>
+        <item>有氧健身操</item>
+        <item>跳绳</item>
+        <item>爬楼梯</item>
+        <item>慢跑</item>
+        <item>快走</item>
+        <item>哑铃训练</item>
+        <item>杠铃训练</item>
+        <item>器械训练</item>
+        <item>俯卧撑</item>
+        <item>仰卧起坐</item>
+        <item>引体向上</item>
+        <item>深蹲</item>
+        <item>瑜伽</item>
+        <item>普拉提</item>
+        <item>拉伸运动</item>
+        <item>太极</item>
+        <item>平衡球训练</item>
+        <item>单腿站立</item>
+        <item>平板支撑</item>
+        <item>高强度间歇训练</item>
+        <item>战绳训练</item>
+        <item>壶铃训练</item>
+        <item>核心训练</item>
+        <item>篮球</item>
+        <item>足球</item>
+        <item>网球</item>
+        <item>羽毛球</item>
+        <item>乒乓球</item>
+        <item>排球</item>
+        <item>舞蹈</item>
+        <item>徒步旅行</item>
+        <item>冥想</item>
+        <item>划船</item>
         <item>其他</item>
     </string-array>
     

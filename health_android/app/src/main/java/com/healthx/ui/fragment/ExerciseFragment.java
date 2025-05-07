@@ -77,9 +77,6 @@ public class ExerciseFragment extends Fragment implements ExerciseAdapter.OnExer
         // 设置RecyclerView和适配器
         setupRecyclerView();
         
-        // 设置TabLayout
-        setupTabLayout();
-        
         // 设置监听器
         setupListeners();
         
@@ -98,6 +95,9 @@ public class ExerciseFragment extends Fragment implements ExerciseAdapter.OnExer
         fabAddExercise = view.findViewById(R.id.fab_add_exercise);
         btnCalendar = view.findViewById(R.id.btn_calendar);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
+        
+        // 隐藏标签页，不再按运动类型分类显示
+        tabExerciseTypes.setVisibility(View.GONE);
     }
     
     private void setupToolbar() {
@@ -127,47 +127,6 @@ public class ExerciseFragment extends Fragment implements ExerciseAdapter.OnExer
         adapter.setOnExerciseClickListener(this);
         recyclerExercises.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerExercises.setAdapter(adapter);
-    }
-    
-    private void setupTabLayout() {
-        tabExerciseTypes.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                String exerciseType;
-                switch (tab.getPosition()) {
-                    case 0:
-                        exerciseType = "ALL";
-                        break;
-                    case 1:
-                        exerciseType = "有氧运动";
-                        break;
-                    case 2:
-                        exerciseType = "力量训练";
-                        break;
-                    case 3:
-                        exerciseType = "柔韧性训练";
-                        break;
-                    case 4:
-                        exerciseType = "平衡训练";
-                        break;
-                    default:
-                        exerciseType = "ALL";
-                        break;
-                }
-                
-                viewModel.loadExercisesByType(1, exerciseType);
-            }
-            
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-                // 不需要处理
-            }
-            
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-                // 不需要处理
-            }
-        });
     }
     
     private void setupListeners() {

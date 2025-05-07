@@ -1,14 +1,20 @@
 package com.healthx.viewmodel;
 
 import android.content.Context;
-import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.healthx.repository.DietRepository;
+import com.healthx.repository.ExerciseRepository;
+import com.healthx.repository.SleepRepository;
+import com.healthx.repository.StepRepository;
+import com.healthx.repository.UserRepository;
+import com.healthx.repository.WeightRepository;
+
 /**
- * 自定义ViewModelFactory，用于传递参数给ViewModel
+ * ViewModel工厂类，用于创建ViewModel实例
  */
 public class ViewModelFactory implements ViewModelProvider.Factory {
     
@@ -20,13 +26,22 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
     
     @NonNull
     @Override
+    @SuppressWarnings("unchecked")
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        if (modelClass.isAssignableFrom(AuthViewModel.class)) {
-            return (T) new AuthViewModel(context);
-        } else if (modelClass.isAssignableFrom(UserViewModel.class)) {
-            // 如果是Application级别的ViewModel，需要获取Application对象
-            return (T) new UserViewModel((Application) context.getApplicationContext());
+        if (modelClass.isAssignableFrom(UserViewModel.class)) {
+            return (T) new UserViewModel(new UserRepository(context));
+        } else if (modelClass.isAssignableFrom(WeightViewModel.class)) {
+            return (T) new WeightViewModel(new WeightRepository(context));
+        } else if (modelClass.isAssignableFrom(DietViewModel.class)) {
+            return (T) new DietViewModel(new DietRepository(context));
+        } else if (modelClass.isAssignableFrom(ExerciseViewModel.class)) {
+            return (T) new ExerciseViewModel(new ExerciseRepository(context));
+        } else if (modelClass.isAssignableFrom(SleepViewModel.class)) {
+            return (T) new SleepViewModel(new SleepRepository(context));
+        } else if (modelClass.isAssignableFrom(StepViewModel.class)) {
+            return (T) new StepViewModel(new StepRepository(context));
         }
+        
         throw new IllegalArgumentException("Unknown ViewModel class: " + modelClass.getName());
     }
 } 

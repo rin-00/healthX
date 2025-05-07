@@ -12,13 +12,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.healthx.R;
 import com.healthx.model.Diet;
+import com.healthx.util.DateTimeUtils;
 
 import org.threeten.bp.format.DateTimeFormatter;
 
 public class DietAdapter extends ListAdapter<Diet, DietAdapter.DietViewHolder> {
     
-    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final DateTimeFormatter timeFormatter = DateTimeUtils.UI_TIME_FORMAT;
+    private final DateTimeFormatter dateFormatter = DateTimeUtils.UI_DATE_FORMAT;
     private OnDietClickListener listener;
     
     public DietAdapter() {

@@ -374,4 +374,36 @@ public class UserRepository {
         userCache.clear();
         saveCache();
     }
+    
+    /**
+     * 获取默认用户信息
+     * 实际应用中应该从SharedPreferences或数据库获取当前登录用户
+     * 这里为了演示，返回一个默认用户
+     */
+    public User getDefaultUser() {
+        // 尝试从SharedPreferences获取当前用户ID
+        long userId = sharedPreferences.getLong("user_id", 1); // 默认用户ID为1
+        
+        // 尝试从缓存获取用户
+        User user = getUserById(userId);
+        if (user != null) {
+            return user;
+        }
+        
+        // 如果缓存中没有，创建一个默认用户
+        User defaultUser = new User();
+        defaultUser.setId(userId);
+        defaultUser.setUsername("default_user");
+        defaultUser.setEmail("default@example.com");
+        defaultUser.setNickname("默认用户");
+        defaultUser.setGender("男");
+        defaultUser.setAge(25);
+        defaultUser.setHeight(175.0);
+        defaultUser.setWeight(70.0);
+        
+        // 保存到缓存
+        saveUser(defaultUser);
+        
+        return defaultUser;
+    }
 } 

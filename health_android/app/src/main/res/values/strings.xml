@@ -70,4 +70,44 @@
     <string name="height">身高</string>
     <string name="weight">体重</string>
     <string name="bmi">BMI指数</string>
+    
+    <!-- 体重管理相关 -->
+    <string name="weight_management">体重管理</string>
+    <string name="add_weight_record">添加体重记录</string>
+    <string name="edit_weight_record">编辑体重记录</string>
+    <string name="weight_history">体重历史</string>
+    <string name="weight_trend">体重趋势</string>
+    <string name="bmi_index">BMI指数</string>
+    <string name="bmi_status">BMI状态</string>
+    <string name="latest_weight">最新体重</string>
+    <string name="weight_kg">%1$s kg</string>
+    <string name="bmi_value">BMI: %1$s</string>
+    <string name="bmi_underweight">偏瘦</string>
+    <string name="bmi_normal">正常</string>
+    <string name="bmi_overweight">超重</string>
+    <string name="bmi_obese">肥胖</string>
+    <string name="no_weight_records">暂无体重记录</string>
+    <string name="add_weight_record_hint">点击下方按钮添加体重记录</string>
+    <string name="weight_hint">体重 (kg)</string>
+    <string name="note_hint">备注 (可选)</string>
+    <string name="please_enter_weight">请输入体重</string>
+    <string name="please_enter_valid_weight">请输入有效的体重值</string>
+    <string name="weight_range_error">请输入合理范围内的体重(30-300kg)</string>
+    <string name="weight_record_saved">体重记录已保存</string>
+    <string name="weight_record_updated">体重记录已更新</string>
+    <string name="weight_record_deleted">体重记录已删除</string>
+    
+    <!-- 步数记录模块 -->
+    <string name="today_steps">今日步数</string>
+    <string name="step_history">历史记录</string>
+    <string name="distance">距离</string>
+    <string name="calories">卡路里</string>
+    <string name="steps">步数</string>
+    <string name="source">来源</string>
+    <string name="manual_input">手动录入</string>
+    <string name="refresh">刷新</string>
+    <string name="submit">提交</string>
+    <string name="input_steps">请输入步数</string>
+    <string name="step_count">步数</string>
+    <string name="record_step">记录步数</string>
 </resources>

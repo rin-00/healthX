@@ -12,12 +12,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.healthx.R;
 import com.healthx.model.Exercise;
+import com.healthx.util.DateTimeUtils;
 
 import org.threeten.bp.format.DateTimeFormatter;
 
 public class ExerciseAdapter extends ListAdapter<Exercise, ExerciseAdapter.ExerciseViewHolder> {
     
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeUtils.UI_DATETIME_FORMAT;
     private OnExerciseClickListener listener;
     
     public ExerciseAdapter() {

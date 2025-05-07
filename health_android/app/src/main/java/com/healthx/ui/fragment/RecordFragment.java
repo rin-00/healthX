@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,6 +18,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.healthx.R;
 import com.healthx.model.HealthCard;
 import com.healthx.ui.adapter.HealthCardAdapter;
+import com.healthx.ui.fragment.DietFragment;
+import com.healthx.ui.fragment.ExerciseFragment;
+import com.healthx.ui.fragment.SleepDetailFragment;
+import com.healthx.ui.fragment.SleepFragment;
+import com.healthx.ui.fragment.StepFragment;
+import com.healthx.ui.weight.WeightFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +92,6 @@ public class RecordFragment extends Fragment implements HealthCardAdapter.OnItem
         List<HealthCard> cards = new ArrayList<>();
         cards.add(new HealthCard(R.string.diet_record, "今天摄入了1800千卡", android.R.drawable.ic_menu_edit));
         cards.add(new HealthCard(R.string.exercise_record, "今天运动消耗了300千卡", android.R.drawable.ic_menu_compass));
-        cards.add(new HealthCard(R.string.water_record, "今天已喝水1500ml", android.R.drawable.ic_menu_info_details));
         cards.add(new HealthCard(R.string.sleep_record, "昨晚睡眠7小时30分钟", android.R.drawable.ic_menu_recent_history));
         cards.add(new HealthCard(R.string.weight_record, "体重：65kg", android.R.drawable.ic_menu_report_image));
         cards.add(new HealthCard(R.string.step_record, "今日步数：8500步", android.R.drawable.ic_menu_directions));
@@ -101,6 +107,15 @@ public class RecordFragment extends Fragment implements HealthCardAdapter.OnItem
         } else if (titleResId == R.string.exercise_record) {
             // 跳转到运动记录页面
             navigateToExerciseFragment();
+        } else if (titleResId == R.string.sleep_record) {
+            // 跳转到睡眠记录页面
+            navigateToSleepFragment();
+        } else if (titleResId == R.string.weight_record) {
+            // 跳转到体重记录页面
+            navigateToWeightFragment();
+        } else if (titleResId == R.string.step_record) {
+            // 跳转到步数记录页面
+            navigateToStepFragment();
         } else {
             // 处理其他类型的记录
             Toast.makeText(requireContext(), "点击了：" + getString(titleResId), Toast.LENGTH_SHORT).show();
@@ -141,6 +156,66 @@ public class RecordFragment extends Fragment implements HealthCardAdapter.OnItem
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, exerciseFragment);
         transaction.addToBackStack("exercise_fragment");
+        transaction.commitAllowingStateLoss();
+        
+        // 确保事务完成后，视图可见性正确设置
+        getChildFragmentManager().executePendingTransactions();
+    }
+    
+    private void navigateToSleepFragment() {
+        // 隐藏RecyclerView和FAB
+        recyclerView.setVisibility(View.GONE);
+        fabAddRecord.setVisibility(View.GONE);
+        
+        // 显示Fragment容器
+        View fragmentContainer = requireView().findViewById(R.id.fragment_container);
+        fragmentContainer.setVisibility(View.VISIBLE);
+        
+        // 直接添加SleepDetailFragment，跳过SleepFragment
+        SleepDetailFragment sleepDetailFragment = new SleepDetailFragment();
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, sleepDetailFragment, "sleep_detail_fragment");
+        transaction.addToBackStack("sleep_detail_fragment");
+        transaction.commitAllowingStateLoss();
+        
+        // 确保事务完成后，视图可见性正确设置
+        getChildFragmentManager().executePendingTransactions();
+    }
+    
+    private void navigateToWeightFragment() {
+        // 隐藏RecyclerView和FAB
+        recyclerView.setVisibility(View.GONE);
+        fabAddRecord.setVisibility(View.GONE);
+        
+        // 显示Fragment容器
+        View fragmentContainer = requireView().findViewById(R.id.fragment_container);
+        fragmentContainer.setVisibility(View.VISIBLE);
+        
+        // 添加WeightFragment
+        WeightFragment weightFragment = new WeightFragment();
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, weightFragment);
+        transaction.addToBackStack("weight_fragment");
+        transaction.commitAllowingStateLoss();
+        
+        // 确保事务完成后，视图可见性正确设置
+        getChildFragmentManager().executePendingTransactions();
+    }
+    
+    private void navigateToStepFragment() {
+        // 隐藏RecyclerView和FAB
+        recyclerView.setVisibility(View.GONE);
+        fabAddRecord.setVisibility(View.GONE);
+        
+        // 显示Fragment容器
+        View fragmentContainer = requireView().findViewById(R.id.fragment_container);
+        fragmentContainer.setVisibility(View.VISIBLE);
+        
+        // 添加StepFragment
+        StepFragment stepFragment = new StepFragment();
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, stepFragment);
+        transaction.addToBackStack("step_fragment");
         transaction.commitAllowingStateLoss();
         
         // 确保事务完成后，视图可见性正确设置

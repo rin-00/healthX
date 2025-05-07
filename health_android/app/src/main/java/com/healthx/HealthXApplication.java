@@ -3,6 +3,7 @@ package com.healthx;
 import android.app.Application;
 import android.util.Log;
 
+import com.healthx.database.AppDatabase;
 import com.healthx.network.TokenManager;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
@@ -16,6 +17,13 @@ public class HealthXApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        
+        // 临时代码：重置数据库（仅开发环境使用，发布前移除！）
+        // AppDatabase.resetDatabase(this); // 注释此行以避免每次启动清除数据
+        
+        // 确保数据库实例已初始化
+        AppDatabase.getInstance(this);
+        Log.d(TAG, "数据库已初始化");
         
         // 初始化TokenManager
         try {
